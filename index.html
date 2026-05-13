@@ -191,15 +191,14 @@ table td{
 
             <thead>
 
-                <tr>
-                    <th># Cotejo</th>
-                    <th>Nombre</th>
-                    <th># Anillo</th>
-                    <th>Peso KG</th>
-                    <th>Relacionados</th>
-                </tr>
+<tr>
+    <th># Cotejo</th>
+    <th>Ave 1</th>
+    <th>Ave 2</th>
+    <th>Diferencia</th>
+</tr>
 
-            </thead>
+</thead>
 
             <tbody id="tablaCotejo"></tbody>
 
@@ -291,45 +290,98 @@ function generarCotejo(){
 
     tabla.innerHTML = "";
 
+    let usados = [];
     let numeroCotejo = 1;
 
-    aves.forEach((aveActual,index) => {
+    for(let i = 0; i < aves.length; i++){
 
-        let relacionados = [];
+        // SI YA FUE USADO
+        if(usados.includes(i)){
+            continue;
+        }
 
-        aves.forEach((otraAve,otroIndex) => {
+        let ave1 = aves[i];
 
-            // NO COMPARARSE CONSIGO MISMO
-            if(index !== otroIndex){
+        let mejorCoincidencia = null;
+        let mejorIndice = null;
+        let menorDiferencia = 999;
 
-                // NO MISMO CLIENTE
-                if(aveActual.nombre !== otraAve.nombre){
+        // BUSCAR LA MEJOR COINCIDENCIA
+        for(let j = 0; j < aves.length; j++){
 
-                    // DIFERENCIA MAXIMA 80 GRAMOS
-                    // 80g = 0.080 KG
+            if(i === j){
+                continue;
+            }
 
-                    const diferencia =
-                    Math.abs(
-                    aveActual.peso - otraAve.peso
-                    );
+            if(usados.includes(j)){
+                continue;
+            }
 
-                    if(diferencia <= 0.080){
+            let ave2 = aves[j];
 
-                        relacionados.push(
+            // NO MISMO CLIENTE
+            if(ave1.nombre === ave2.nombre){
+                continue;
+            }
 
-                        `${otraAve.nombre}
-                        (#${otraAve.anillo}
-                        - ${otraAve.peso.toFixed(3)}kg)`
+            let diferencia =
+            Math.abs(ave1.peso - ave2.peso);
 
-                        );
+            // MAXIMO 80 GRAMOS
+            if(diferencia <= 0.080){
 
-                    }
+                // TOMAR LA MAS CERCANA
+                if(diferencia < menorDiferencia){
+
+                    menorDiferencia = diferencia;
+                    mejorCoincidencia = ave2;
+                    mejorIndice = j;
 
                 }
 
             }
 
-        });
+        }
+
+        // SI ENCONTRO PAREJA
+        if(mejorCoincidencia){
+
+            usados.push(i);
+            usados.push(mejorIndice);
+
+            tabla.innerHTML += `
+
+            <tr>
+
+                <td>${numeroCotejo}</td>
+
+                <td>
+                    ${ave1.nombre}<br>
+                    #${ave1.anillo}<br>
+                    ${ave1.peso.toFixed(3)} KG
+                </td>
+
+                <td>
+                    ${mejorCoincidencia.nombre}<br>
+                    #${mejorCoincidencia.anillo}<br>
+                    ${mejorCoincidencia.peso.toFixed(3)} KG
+                </td>
+
+                <td>
+                    ${(menorDiferencia * 1000).toFixed(0)} gramos
+                </td>
+
+            </tr>
+
+            `;
+
+            numeroCotejo++;
+
+        }
+
+    }
+
+}
 
         tabla.innerHTML += `
 
