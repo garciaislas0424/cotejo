@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -307,10 +308,19 @@ function registrarAve(){
     const anillo =
     document.getElementById("anillo").value.trim();
 
-    const peso =
-    parseFloat(
-    document.getElementById("peso").value
-    );
+    let peso =
+parseFloat(
+document.getElementById("peso")
+.value
+.replace(",", ".")
+);
+
+// SI ESCRIBEN EN GRAMOS
+if(peso > 100){
+
+    peso = peso / 1000;
+
+}
 
     if(nombre === "" ||
        anillo === "" ||
