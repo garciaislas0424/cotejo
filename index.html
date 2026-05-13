@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cotejo de Aves por Peso</title>
+<title>Cotejo de Exhibición</title>
 
 <style>
 
@@ -16,7 +17,7 @@
 }
 
 body{
-    background:#f4f6f9;
+    background:#f3f4f6;
     padding:20px;
 }
 
@@ -27,14 +28,21 @@ body{
 
 h1{
     text-align:center;
-    color:#2c3e50;
+    color:#1f2937;
     margin-bottom:10px;
 }
 
 .subtitulo{
     text-align:center;
     color:#666;
+    margin-bottom:25px;
+}
+
+.fecha{
+    text-align:center;
     margin-bottom:20px;
+    font-weight:bold;
+    color:#444;
 }
 
 .card{
@@ -45,10 +53,15 @@ h1{
     margin-bottom:20px;
 }
 
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:10px;
+}
+
 input{
     width:100%;
     padding:12px;
-    margin-top:10px;
     border:1px solid #ccc;
     border-radius:10px;
 }
@@ -59,108 +72,141 @@ button{
     margin-top:15px;
     border:none;
     border-radius:10px;
-    background:#27ae60;
+    background:#16a34a;
     color:white;
     font-size:16px;
     cursor:pointer;
 }
 
 button:hover{
-    background:#219150;
+    background:#15803d;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
     margin-top:20px;
+    font-size:14px;
 }
 
 table th{
-    background:#27ae60;
+    background:#16a34a;
     color:white;
-    padding:12px;
+    border:1px solid #000;
+    padding:10px;
 }
 
 table td{
-    border:1px solid #ddd;
-    padding:10px;
+    border:1px solid #000;
+    padding:8px;
     text-align:center;
 }
 
 .aviso{
-    margin-top:15px;
+    margin-top:10px;
+    background:#f1f5f9;
     padding:10px;
-    background:#f1f1f1;
     border-radius:10px;
+}
+
+.print-title{
+    display:none;
 }
 
 @media print{
 
+    body{
+        background:white;
+        padding:0;
+    }
+
     button,
-    .no-print{
+    input,
+    .no-print,
+    .aviso{
         display:none;
     }
 
-    body{
-        background:white;
+    .card{
+        box-shadow:none;
+        border:none;
+    }
+
+    .print-title{
+        display:block;
+        text-align:center;
+        margin-bottom:20px;
     }
 
 }
 
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-    <h1>🐔 Sistema de Cotejo de Aves</h1>
+    <h1>🐔 Cotejo de Exhibición</h1>
 
     <p class="subtitulo">
-        Relación de peso por número de anillo
+        Sistema de relación de peso por anillo
     </p>
 
+    <div class="fecha" id="fechaActual"></div>
+
     <!-- REGISTRO -->
-    <div class="card">
+    <div class="card no-print">
 
-        <h2>Registro de Cliente y Ave</h2>
+        <h2>Registro de Aves</h2>
 
-        <input type="text"
-        id="nombre"
-        placeholder="Nombre del cliente">
+        <div class="grid">
 
-        <input type="text"
-        id="anillo"
-        placeholder="Número de anillo">
+            <input type="text"
+            id="nombre"
+            placeholder="Nombre del cliente/equipo">
 
-        <input type="number"
-        step="0.001"
-        id="peso"
-        placeholder="Peso en KG">
+            <input type="text"
+            id="anillo"
+            placeholder="Número de anillo">
+
+            <input type="number"
+            step="0.001"
+            id="peso"
+            placeholder="Peso en KG">
+
+        </div>
 
         <button onclick="registrarAve()">
             Registrar Ave
         </button>
 
         <div class="aviso">
-            Máximo 9 aves por cliente
+            Máximo 9 aves por cliente.
+            El sistema coteja automáticamente
+            aves con máximo 80 gramos de diferencia.
         </div>
 
     </div>
 
-    <!-- REGISTROS -->
+    <!-- TABLA REGISTROS -->
     <div class="card">
 
-        <h2>Aves Registradas</h2>
+        <h2 class="no-print">
+            Aves Registradas
+        </h2>
 
         <table>
 
             <thead>
+
                 <tr>
                     <th>Cliente</th>
-                    <th># Anillo</th>
+                    <th>Anillo</th>
                     <th>Peso KG</th>
                 </tr>
+
             </thead>
 
             <tbody id="tablaRegistros"></tbody>
@@ -169,7 +215,7 @@ table td{
 
     </div>
 
-    <!-- GENERAR COTEJO -->
+    <!-- BOTONES -->
     <div class="card no-print">
 
         <button onclick="generarCotejo()">
@@ -182,23 +228,42 @@ table td{
 
     </div>
 
-    <!-- RESULTADOS -->
+    <!-- COTEJO -->
     <div class="card">
 
-        <h2>Resultado del Cotejo</h2>
+        <div class="print-title">
+
+            <h2>🐔 CoteJO DE EXHIBICIÓN</h2>
+
+            <p id="fechaImpresion"></p>
+
+        </div>
+
+        <h2>
+            Lista de Cotejo
+        </h2>
 
         <table>
 
             <thead>
 
-<tr>
-    <th># Cotejo</th>
-    <th>Ave 1</th>
-    <th>Ave 2</th>
-    <th>Diferencia</th>
-</tr>
+                <tr>
 
-</thead>
+                    <th>Orden</th>
+
+                    <th>Equipo</th>
+                    <th>Anillo</th>
+                    <th>Peso</th>
+
+                    <th>Contra</th>
+
+                    <th>Equipo</th>
+                    <th>Anillo</th>
+                    <th>Peso</th>
+
+                </tr>
+
+            </thead>
 
             <tbody id="tablaCotejo"></tbody>
 
@@ -212,6 +277,27 @@ table td{
 
 let aves = [];
 
+// FECHA Y HORA
+function actualizarFecha(){
+
+    const fecha =
+    new Date().toLocaleString("es-MX",{
+
+        dateStyle:"full",
+        timeStyle:"short"
+
+    });
+
+    document.getElementById("fechaActual")
+    .innerHTML = fecha;
+
+    document.getElementById("fechaImpresion")
+    .innerHTML = fecha;
+
+}
+
+actualizarFecha();
+
 // REGISTRAR AVE
 function registrarAve(){
 
@@ -222,22 +308,31 @@ function registrarAve(){
     document.getElementById("anillo").value.trim();
 
     const peso =
-    parseFloat(document.getElementById("peso").value);
+    parseFloat(
+    document.getElementById("peso").value
+    );
 
-    if(nombre === "" || anillo === "" || isNaN(peso)){
+    if(nombre === "" ||
+       anillo === "" ||
+       isNaN(peso)){
 
         alert("Completa todos los campos");
         return;
 
     }
 
-    // CONTAR AVES DEL CLIENTE
-    const cantidadCliente =
-    aves.filter(ave => ave.nombre === nombre).length;
+    // MAXIMO 9 AVES
+    const totalCliente =
+    aves.filter(
+    ave => ave.nombre === nombre
+    ).length;
 
-    if(cantidadCliente >= 9){
+    if(totalCliente >= 9){
 
-        alert("Este cliente ya registró 9 aves");
+        alert(
+        "Este cliente ya registró 9 aves"
+        );
+
         return;
 
     }
@@ -271,9 +366,13 @@ function mostrarRegistros(){
         tabla.innerHTML += `
 
         <tr>
+
             <td>${ave.nombre}</td>
+
             <td>${ave.anillo}</td>
+
             <td>${ave.peso.toFixed(3)}</td>
+
         </tr>
 
         `;
@@ -291,22 +390,22 @@ function generarCotejo(){
     tabla.innerHTML = "";
 
     let usados = [];
-    let numeroCotejo = 1;
+
+    let numeroOrden = 1;
 
     for(let i = 0; i < aves.length; i++){
 
-        // SI YA FUE USADO
         if(usados.includes(i)){
             continue;
         }
 
         let ave1 = aves[i];
 
-        let mejorCoincidencia = null;
         let mejorIndice = null;
+
         let menorDiferencia = 999;
 
-        // BUSCAR LA MEJOR COINCIDENCIA
+        // BUSCAR COINCIDENCIA
         for(let j = 0; j < aves.length; j++){
 
             if(i === j){
@@ -324,17 +423,21 @@ function generarCotejo(){
                 continue;
             }
 
+            // DIFERENCIA
             let diferencia =
-            Math.abs(ave1.peso - ave2.peso);
+            Math.abs(
+            ave1.peso - ave2.peso
+            );
 
             // MAXIMO 80 GRAMOS
             if(diferencia <= 0.080){
 
-                // TOMAR LA MAS CERCANA
+                // MAS CERCANO
                 if(diferencia < menorDiferencia){
 
-                    menorDiferencia = diferencia;
-                    mejorCoincidencia = ave2;
+                    menorDiferencia =
+                    diferencia;
+
                     mejorIndice = j;
 
                 }
@@ -344,7 +447,9 @@ function generarCotejo(){
         }
 
         // SI ENCONTRO PAREJA
-        if(mejorCoincidencia){
+        if(mejorIndice !== null){
+
+            let ave2 = aves[mejorIndice];
 
             usados.push(i);
             usados.push(mejorIndice);
@@ -353,63 +458,31 @@ function generarCotejo(){
 
             <tr>
 
-                <td>${numeroCotejo}</td>
+                <td>${numeroOrden}</td>
 
-                <td>
-                    ${ave1.nombre}<br>
-                    #${ave1.anillo}<br>
-                    ${ave1.peso.toFixed(3)} KG
-                </td>
+                <td>${ave1.nombre}</td>
 
-                <td>
-                    ${mejorCoincidencia.nombre}<br>
-                    #${mejorCoincidencia.anillo}<br>
-                    ${mejorCoincidencia.peso.toFixed(3)} KG
-                </td>
+                <td>${ave1.anillo}</td>
 
-                <td>
-                    ${(menorDiferencia * 1000).toFixed(0)} gramos
-                </td>
+                <td>${ave1.peso.toFixed(3)}</td>
+
+                <td>VS</td>
+
+                <td>${ave2.nombre}</td>
+
+                <td>${ave2.anillo}</td>
+
+                <td>${ave2.peso.toFixed(3)}</td>
 
             </tr>
 
             `;
 
-            numeroCotejo++;
+            numeroOrden++;
 
         }
 
     }
-
-}
-
-        tabla.innerHTML += `
-
-        <tr>
-
-            <td>${numeroCotejo}</td>
-
-            <td>${aveActual.nombre}</td>
-
-            <td>${aveActual.anillo}</td>
-
-            <td>${aveActual.peso.toFixed(3)}</td>
-
-            <td>
-
-            ${relacionados.length > 0
-            ? relacionados.join("<br>")
-            : "Sin coincidencias"}
-
-            </td>
-
-        </tr>
-
-        `;
-
-        numeroCotejo++;
-
-    });
 
 }
 
