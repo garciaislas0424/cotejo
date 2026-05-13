@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cotejo de Aves por Peso</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    padding:20px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:#2c3e50;
+    margin-bottom:10px;
+}
+
+.subtitulo{
+    text-align:center;
+    color:#666;
+    margin-bottom:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 0 10px rgba(0,0,0,.1);
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:1px solid #ccc;
+    border-radius:10px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    background:#27ae60;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#219150;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+table th{
+    background:#27ae60;
+    color:white;
+    padding:12px;
+}
+
+table td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+.aviso{
+    margin-top:15px;
+    padding:10px;
+    background:#f1f1f1;
+    border-radius:10px;
+}
+
+@media print{
+
+    button,
+    .no-print{
+        display:none;
+    }
+
+    body{
+        background:white;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🐔 Sistema de Cotejo de Aves</h1>
+
+    <p class="subtitulo">
+        Relación de peso por número de anillo
+    </p>
+
+    <!-- REGISTRO -->
+    <div class="card">
+
+        <h2>Registro de Cliente y Ave</h2>
+
+        <input type="text"
+        id="nombre"
+        placeholder="Nombre del cliente">
+
+        <input type="text"
+        id="anillo"
+        placeholder="Número de anillo">
+
+        <input type="number"
+        step="0.001"
+        id="peso"
+        placeholder="Peso en KG">
+
+        <button onclick="registrarAve()">
+            Registrar Ave
+        </button>
+
+        <div class="aviso">
+            Máximo 9 aves por cliente
+        </div>
+
+    </div>
+
+    <!-- REGISTROS -->
+    <div class="card">
+
+        <h2>Aves Registradas</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th># Anillo</th>
+                    <th>Peso KG</th>
+                </tr>
+            </thead>
+
+            <tbody id="tablaRegistros"></tbody>
+
+        </table>
+
+    </div>
+
+    <!-- GENERAR COTEJO -->
+    <div class="card no-print">
+
+        <button onclick="generarCotejo()">
+            Generar Cotejo
+        </button>
+
+        <button onclick="window.print()">
+            Imprimir Lista
+        </button>
+
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="card">
+
+        <h2>Resultado del Cotejo</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th># Cotejo</th>
+                    <th>Nombre</th>
+                    <th># Anillo</th>
+                    <th>Peso KG</th>
+                    <th>Relacionados</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="tablaCotejo"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+let aves = [];
+
+// REGISTRAR AVE
+function registrarAve(){
+
+    const nombre =
+    document.getElementById("nombre").value.trim();
+
+    const anillo =
+    document.getElementById("anillo").value.trim();
+
+    const peso =
+    parseFloat(document.getElementById("peso").value);
+
+    if(nombre === "" || anillo === "" || isNaN(peso)){
+
+        alert("Completa todos los campos");
+        return;
+
+    }
+
+    // CONTAR AVES DEL CLIENTE
+    const cantidadCliente =
+    aves.filter(ave => ave.nombre === nombre).length;
+
+    if(cantidadCliente >= 9){
+
+        alert("Este cliente ya registró 9 aves");
+        return;
+
+    }
+
+    aves.push({
+
+        nombre,
+        anillo,
+        peso
+
+    });
+
+    mostrarRegistros();
+
+    // LIMPIAR
+    document.getElementById("anillo").value = "";
+    document.getElementById("peso").value = "";
+
+}
+
+// MOSTRAR REGISTROS
+function mostrarRegistros(){
+
+    const tabla =
+    document.getElementById("tablaRegistros");
+
+    tabla.innerHTML = "";
+
+    aves.forEach(ave => {
+
+        tabla.innerHTML += `
+
+        <tr>
+            <td>${ave.nombre}</td>
+            <td>${ave.anillo}</td>
+            <td>${ave.peso.toFixed(3)}</td>
+        </tr>
+
+        `;
+
+    });
+
+}
+
+// GENERAR COTEJO
+function generarCotejo(){
+
+    const tabla =
+    document.getElementById("tablaCotejo");
+
+    tabla.innerHTML = "";
+
+    let numeroCotejo = 1;
+
+    aves.forEach((aveActual,index) => {
+
+        let relacionados = [];
+
+        aves.forEach((otraAve,otroIndex) => {
+
+            // NO COMPARARSE CONSIGO MISMO
+            if(index !== otroIndex){
+
+                // NO MISMO CLIENTE
+                if(aveActual.nombre !== otraAve.nombre){
+
+                    // DIFERENCIA MAXIMA 80 GRAMOS
+                    // 80g = 0.080 KG
+
+                    const diferencia =
+                    Math.abs(
+                    aveActual.peso - otraAve.peso
+                    );
+
+                    if(diferencia <= 0.080){
+
+                        relacionados.push(
+
+                        `${otraAve.nombre}
+                        (#${otraAve.anillo}
+                        - ${otraAve.peso.toFixed(3)}kg)`
+
+                        );
+
+                    }
+
+                }
+
+            }
+
+        });
+
+        tabla.innerHTML += `
+
+        <tr>
+
+            <td>${numeroCotejo}</td>
+
+            <td>${aveActual.nombre}</td>
+
+            <td>${aveActual.anillo}</td>
+
+            <td>${aveActual.peso.toFixed(3)}</td>
+
+            <td>
+
+            ${relacionados.length > 0
+            ? relacionados.join("<br>")
+            : "Sin coincidencias"}
+
+            </td>
+
+        </tr>
+
+        `;
+
+        numeroCotejo++;
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
